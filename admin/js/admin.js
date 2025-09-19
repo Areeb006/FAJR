@@ -237,6 +237,22 @@ function setupEventListeners() {
     if (orderStatusFilter) {
         orderStatusFilter.addEventListener('change', filterOrders);
     }
+    
+    // Add window resize listener for responsive orders display
+    window.addEventListener('resize', function() {
+        const table = document.querySelector('#orders .data-table');
+        const mobileCards = document.getElementById('orders-mobile-cards');
+        
+        if (table && mobileCards) {
+            if (window.innerWidth <= 768) {
+                table.style.display = 'none';
+                mobileCards.style.display = 'block';
+            } else {
+                table.style.display = 'table';
+                mobileCards.style.display = 'none';
+            }
+        }
+    });
 }
 
 // Dashboard functions
@@ -1054,26 +1070,44 @@ function deleteUser(userId) {
 
 // Order management functions
 async function loadOrders() {
+    console.log('LoadOrders function called');
     try {
+        console.log('Fetching orders from /api/admin/orders');
         const response = await fetch('/api/admin/orders');
+        console.log('Response received:', response);
+        console.log('Response status:', response.status);
+        console.log('Response ok:', response.ok);
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
         const data = await response.json();
+        console.log('Data parsed:', data);
         
         if (data.success) {
+            console.log('Orders loaded successfully, calling displayOrders');
             displayOrders(data.orders);
         } else {
+            console.error('Server returned error:', data.message);
             showError('Failed to load orders: ' + data.message);
         }
     } catch (error) {
         console.error('Error loading orders:', error);
-        showError('Failed to load orders');
+        showError('Failed to load orders: ' + error.message);
     }
 }
 
 function displayOrders(orders) {
+    console.log('DisplayOrders called with:', orders);
+    
     const tableBody = document.getElementById('orders-table-body');
     const mobileCardsContainer = document.getElementById('orders-mobile-cards');
     
-    if (!tableBody) return;
+    if (!tableBody) {
+        console.error('Orders table body not found!');
+        return;
+    }
     
     if (orders.length === 0) {
         tableBody.innerHTML = '<tr><td colspan="7" class="text-center">No orders found</td></tr>';
@@ -1083,16 +1117,31 @@ function displayOrders(orders) {
         return;
     }
     
+    console.log(`Displaying ${orders.length} orders`);
+    
     // Create desktop table rows
     const fragment = document.createDocumentFragment();
-    orders.forEach(order => {
+    orders.forEach((order, index) => {
+        console.log(`Processing order ${index}:`, order);
+        
         const tr = document.createElement('tr');
         tr.innerHTML = `
-            <td>${order.id}</td>
-            <td>${order.user_id}</td>
+            <td>#${order.id || 'N/A'}</td>
+            <td>
+                <div>
+                    <strong>${order.user_name || 'Unknown User'}</strong><br>
+                    <small>${order.user_email || 'No email'}</small>
+                </div>
+            </td>
+            <td>
+                <div>
+                    <strong>${order.product_title || 'Unknown Product'}</strong><br>
+                    <small>Qty: ${order.quantity || 1}</small>
+                </div>
+            </td>
             <td>₹${parseFloat(order.total_amount || 0).toLocaleString('en-IN')}</td>
             <td><span class="status-badge status-${order.order_status || 'pending'}">${order.order_status || 'pending'}</span></td>
-            <td>${new Date(order.created_at).toLocaleDateString()}</td>
+            <td>${order.created_at ? new Date(order.created_at).toLocaleDateString() : 'N/A'}</td>
             <td>
                 <div class="action-buttons">
                     <button class="btn btn-sm btn-primary" onclick="viewOrder(${order.id})" title="View Order">
@@ -1112,19 +1161,28 @@ function displayOrders(orders) {
     
     // Create mobile cards if container exists
     if (mobileCardsContainer) {
+        console.log('Creating mobile cards');
         mobileCardsContainer.innerHTML = '';
         orders.forEach(order => {
             const mobileCard = document.createElement('div');
             mobileCard.className = 'mobile-card';
             mobileCard.innerHTML = `
                 <div class="mobile-card-header">
-                    <div class="mobile-card-title">Order #${order.id}</div>
+                    <div class="mobile-card-title">Order #${order.id || 'N/A'}</div>
                     <div class="status-badge status-${order.order_status || 'pending'}">${order.order_status || 'pending'}</div>
                 </div>
                 <div class="mobile-card-content">
                     <div class="mobile-card-row">
-                        <span class="mobile-card-label">User ID:</span>
-                        <span class="mobile-card-value">${order.user_id}</span>
+                        <span class="mobile-card-label">Customer:</span>
+                        <span class="mobile-card-value">${order.user_name || 'Unknown User'}</span>
+                    </div>
+                    <div class="mobile-card-row">
+                        <span class="mobile-card-label">Email:</span>
+                        <span class="mobile-card-value">${order.user_email || 'No email'}</span>
+                    </div>
+                    <div class="mobile-card-row">
+                        <span class="mobile-card-label">Product:</span>
+                        <span class="mobile-card-value">${order.product_title || 'Unknown Product'}</span>
                     </div>
                     <div class="mobile-card-row">
                         <span class="mobile-card-label">Amount:</span>
@@ -1132,7 +1190,7 @@ function displayOrders(orders) {
                     </div>
                     <div class="mobile-card-row">
                         <span class="mobile-card-label">Date:</span>
-                        <span class="mobile-card-value">${new Date(order.created_at).toLocaleDateString()}</span>
+                        <span class="mobile-card-value">${order.created_at ? new Date(order.created_at).toLocaleDateString() : 'N/A'}</span>
                     </div>
                     <div class="mobile-card-actions">
                         <button class="btn btn-sm btn-primary" onclick="viewOrder(${order.id})">
@@ -1146,7 +1204,18 @@ function displayOrders(orders) {
             `;
             mobileCardsContainer.appendChild(mobileCard);
         });
+        
+        // Show mobile cards on mobile devices
+        if (window.innerWidth <= 768) {
+            document.querySelector('.data-table').style.display = 'none';
+            mobileCardsContainer.style.display = 'block';
+        } else {
+            document.querySelector('.data-table').style.display = 'table';
+            mobileCardsContainer.style.display = 'none';
+        }
     }
+    
+    console.log('Orders display completed');
 }
 
 // Delete order function
@@ -1178,30 +1247,42 @@ function deleteOrder(orderId) {
 
 function filterOrders() {
     const statusFilter = document.getElementById('order-status-filter').value.toLowerCase();
+    console.log('Filtering orders by status:', statusFilter);
     
     // Filter table rows
     const rows = document.querySelectorAll('#orders-table-body tr');
+    console.log('Found', rows.length, 'rows to filter');
     
-    rows.forEach(row => {
+    rows.forEach((row, index) => {
         const cells = row.querySelectorAll('td');
-        if (cells.length < 6) return; // Skip loading/empty rows
+        if (cells.length < 6) {
+            console.log(`Row ${index}: Skipping (${cells.length} cells)`);
+            return; // Skip loading/empty rows
+        }
 
-        // Get status from the status badge in the Status column (4th column, index 3)
-        const statusBadge = cells[3].querySelector('.status-badge');
+        // Get status from the status badge in the Status column (5th column, index 4)
+        // Table structure: Order ID | Customer | Products | Total | Status | Date | Actions
+        const statusBadge = cells[4].querySelector('.status-badge');
         const status = statusBadge ? statusBadge.textContent.trim().toLowerCase() : '';
+        console.log(`Row ${index}: Status found = "${status}"`);
 
         if (!statusFilter || status === statusFilter) {
             row.style.display = '';
+            console.log(`Row ${index}: Showing (matches filter)`);
         } else {
             row.style.display = 'none';
+            console.log(`Row ${index}: Hiding (doesn't match filter)`);
         }
     });
     
     // Filter mobile cards
     const mobileCards = document.querySelectorAll('#orders-mobile-cards .mobile-card');
-    mobileCards.forEach(card => {
+    console.log('Found', mobileCards.length, 'mobile cards to filter');
+    
+    mobileCards.forEach((card, index) => {
         const statusElement = card.querySelector('.status-badge');
         const status = statusElement ? statusElement.textContent.trim().toLowerCase() : '';
+        console.log(`Mobile card ${index}: Status = "${status}"`);
 
         if (!statusFilter || status === statusFilter) {
             card.style.display = '';
@@ -1209,105 +1290,181 @@ function filterOrders() {
             card.style.display = 'none';
         }
     });
+    
+    console.log('Filter completed');
 }
 
 function viewOrder(orderId) {
+    console.log('ViewOrder called with ID:', orderId);
     currentOrderId = orderId;
     
+    // Open the modal first
+    const modal = document.getElementById('order-modal');
+    if (modal) {
+        modal.style.display = 'block';
+    } else {
+        console.error('Order modal not found!');
+        showError('Order modal not found');
+        return;
+    }
+    
+    // Show loading state
+    const orderDetailsContent = document.getElementById('order-details-content');
+    if (orderDetailsContent) {
+        orderDetailsContent.innerHTML = '<div class="loading">Loading order details...</div>';
+    }
+    
+    console.log('Fetching order details from:', `/api/orders/${orderId}`);
+    
     fetch(`/api/orders/${orderId}`)
-        .then(response => response.json())
+        .then(response => {
+            console.log('Order details response:', response);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
         .then(data => {
+            console.log('Order details data:', data);
+            
             if (data.success && data.order) {
                 const order = data.order;
                 
-                document.getElementById('order-details').innerHTML = `
-                    <div class="order-details">
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label>Order ID</label>
-                                <input type="text" value="#${order.id}" readonly>
+                if (orderDetailsContent) {
+                    orderDetailsContent.innerHTML = `
+                        <div class="order-details">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Order ID</label>
+                                    <input type="text" value="#${order.id}" readonly>
+                                </div>
+                                <div class="form-group">
+                                    <label>Customer</label>
+                                    <input type="text" value="${order.user_name || 'Unknown User'}" readonly>
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Email</label>
+                                    <input type="text" value="${order.user_email || 'No email'}" readonly>
+                                </div>
+                                <div class="form-group">
+                                    <label>Total Amount</label>
+                                    <input type="text" value="₹${parseFloat(order.total_amount || 0).toLocaleString('en-IN')}" readonly>
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Payment Method</label>
+                                    <input type="text" value="${order.payment_method || 'Cash on Delivery'}" readonly>
+                                </div>
+                                <div class="form-group">
+                                    <label>Status</label>
+                                    <select id="order-status-select" class="form-control" onchange="updateOrderStatus(${order.id})">
+                                        <option value="pending" ${order.status === 'pending' ? 'selected' : ''}>Pending</option>
+                                        <option value="placed" ${order.status === 'placed' ? 'selected' : ''}>Placed</option>
+                                        <option value="shipped" ${order.status === 'shipped' ? 'selected' : ''}>Shipped</option>
+                                        <option value="out_for_delivery" ${order.status === 'out_for_delivery' ? 'selected' : ''}>Out for Delivery</option>
+                                        <option value="delivered" ${order.status === 'delivered' ? 'selected' : ''}>Delivered</option>
+                                        <option value="cancelled" ${order.status === 'cancelled' ? 'selected' : ''}>Cancelled</option>
+                                    </select>
+                                </div>
                             </div>
                             <div class="form-group">
-                                <label>Total Amount</label>
-                                <input type="text" value="₹${order.total_amount.toLocaleString('en-IN')}" readonly>
-                            </div>
-                        </div>
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label>Payment Method</label>
-                                <input type="text" value="${order.payment_method}" readonly>
+                                <label>Shipping Address</label>
+                                <textarea readonly rows="3">${order.shipping_address || 'Address will be collected during delivery'}</textarea>
                             </div>
                             <div class="form-group">
-                                <label>Status</label>
-                                <input type="text" value="${order.status}" readonly>
+                                <label>Order Date</label>
+                                <input type="text" value="${order.created_at ? new Date(order.created_at).toLocaleString() : 'Unknown date'}" readonly>
+                            </div>
+                            <div class="form-group">
+                                <label>Order Items</label>
+                                <div class="order-items">
+                                    ${order.items && order.items.length > 0 ? order.items.map(item => `
+                                        <div class="order-item">
+                                            <strong>${item.product_title || 'Unknown Product'}</strong><br>
+                                            Quantity: ${item.quantity || 1} × ₹${parseFloat(item.price || 0).toLocaleString('en-IN')}
+                                        </div>
+                                    `).join('') : '<div class="order-item">No items found</div>'}
+                                </div>
                             </div>
                         </div>
-                        <div class="form-group">
-                            <label>Shipping Address</label>
-                            <textarea readonly rows="3">${order.shipping_address}</textarea>
-                        </div>
-                        <div class="form-group">
-                            <label>Order Date</label>
-                            <input type="text" value="${new Date(order.created_at).toLocaleString()}" readonly>
-                        </div>
-                        <div class="form-group">
-                            <label>Order Items</label>
-                            <div class="order-items">
-                                ${order.items.map(item => `
-                                    <div class="order-item">
-                                        <strong>${item.product_title}</strong><br>
-                                        Quantity: ${item.quantity} × ₹${item.price.toLocaleString('en-IN')}
-                                    </div>
-                                `).join('')}
-                            </div>
-                        </div>
-                    </div>
-                `;
-                
-                document.getElementById('order-modal').style.display = 'block';
+                    `;
+                } else {
+                    console.error('Order details content element not found!');
+                }
             } else {
-                showError('Failed to load order data');
+                console.error('Failed to load order:', data.message);
+                showError('Failed to load order: ' + (data.message || 'Unknown error'));
+                if (orderDetailsContent) {
+                    orderDetailsContent.innerHTML = '<div class="error">Failed to load order details</div>';
+                }
             }
         })
         .catch(error => {
             console.error('Error loading order:', error);
-            showError('Failed to load order data');
+            showError('Failed to load order: ' + error.message);
+            if (orderDetailsContent) {
+                orderDetailsContent.innerHTML = '<div class="error">Failed to load order details</div>';
+            }
         });
 }
 
 function closeOrderModal() {
-    document.getElementById('order-modal').style.display = 'none';
+    const modal = document.getElementById('order-modal');
+    if (modal) {
+        modal.style.display = 'none';
+    }
     currentOrderId = null;
 }
 
-// Function to update order status
-async function updateOrderStatus(orderId, newStatus) {
-    try {
-        const response = await fetch(`/api/admin/orders/${orderId}/status`, {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ status: newStatus })
-        });
-        
-        const data = await response.json();
-        
+function updateOrderStatus(orderId) {
+    const statusSelect = document.getElementById('order-status-select');
+    if (!statusSelect) {
+        console.error('Status select element not found');
+        return;
+    }
+    
+    const newStatus = statusSelect.value;
+    console.log(`Updating order ${orderId} status to: ${newStatus}`);
+    
+    // Show loading state
+    statusSelect.disabled = true;
+    
+    fetch(`/api/admin/orders/${orderId}/status`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ status: newStatus })
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+    })
+    .then(data => {
         if (data.success) {
-            alert('Order status updated successfully!');
+            showSuccess('Order status updated successfully');
             // Refresh the orders list to show updated status
             loadOrders();
         } else {
-            alert('Error updating order status: ' + data.message);
-            // Reset the dropdown to previous value
-            loadOrders();
+            showError('Failed to update order status: ' + (data.message || 'Unknown error'));
+            // Revert the select to previous value
+            location.reload(); // Simple way to revert
         }
-    } catch (error) {
+    })
+    .catch(error => {
         console.error('Error updating order status:', error);
-        alert('Failed to update order status. Please try again.');
-        // Reset the dropdown to previous value
-        loadOrders();
-    }
+        showError('Failed to update order status: ' + error.message);
+        // Revert the select to previous value
+        location.reload(); // Simple way to revert
+    })
+    .finally(() => {
+        statusSelect.disabled = false;
+    });
 }
 
 // Utility functions
