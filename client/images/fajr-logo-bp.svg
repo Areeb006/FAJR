@@ -1,0 +1,14 @@
+<svg width="180" height="100" viewBox="0 0 180 100" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background shape -->
+  <rect width="180" height="100" rx="10" fill="none"/>
+  
+  <!-- Luxury brand name -->
+  <text x="90" y="45" font-family="'Playfair Display', serif" font-size="32" font-weight="700" font-style="italic" text-anchor="middle" fill="#b19b82">FAJR</text>
+  
+  <!-- Luxury tagline -->
+  <text x="90" y="65" font-family="'Poppins', sans-serif" font-size="12" font-weight="300" text-anchor="middle" fill="#ffffff">LUXURY COLLECTION</text>
+  
+  <!-- Decorative elements -->
+  <line x1="45" y1="75" x2="135" y2="75" stroke="#b19b82" stroke-width="1"/>
+  <circle cx="90" cy="75" r="3" fill="#b19b82"/>
+</svg>

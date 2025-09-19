@@ -1,0 +1,5 @@
+<svg width="1920" height="800" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1920" height="800" fill="#1a1a1a"/>
+  <text x="960" y="400" font-family="Arial" font-size="60" text-anchor="middle" fill="#b19b82">Hero Background</text>
+  <rect x="710" y="300" width="500" height="200" stroke="#b19b82" stroke-width="3" fill="none"/>
+</svg>

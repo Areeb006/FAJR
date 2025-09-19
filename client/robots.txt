@@ -1,0 +1,22 @@
+User-agent: *
+Allow: /
+Disallow: /cart.html
+Disallow: /account.html
+Disallow: /checkout.html
+Disallow: /admin/
+Disallow: /includes/
+Disallow: /js/
+Disallow: /css/
+
+# Allow Google Images to crawl images
+User-agent: Googlebot-Image
+Allow: /images/
+
+# Allow Google to crawl JavaScript and CSS
+User-agent: Googlebot
+Allow: /*.js$
+Allow: /*.css$
+
+# Sitemap location
+Sitemap: https://fajrluxury.com/sitemap.xml
+Sitemap: https://fajrluxury.com/sitemap.xml

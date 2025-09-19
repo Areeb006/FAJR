@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Learn about Fajr Luxury's journey, our commitment to crafting exceptional fragrances, and the artisans behind our premium perfume collections.">
+    <meta name="keywords" content="Fajr Luxury history, perfume artisans, luxury fragrance brand, premium perfume makers, about Fajr">
+    <meta name="author" content="Fajr Luxury">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://fajrluxury.com/about.html">
+    <title>About Fajr Luxury | Our Story and Fragrance Philosophy</title>
+    <link rel="stylesheet" href="css/style.css">
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org/",
+      "@type": "Organization",
+      "name": "Fajr Luxury",
+      "url": "https://fajrluxury.com",
+      "logo": "https://fajrluxury.com/images/logo.png",
+      "description": "Fajr Luxury is a premium perfume brand dedicated to crafting exceptional fragrances using the finest ingredients from around the world.",
+      "foundingDate": "2010",
+      "founders": [
+        {
+          "@type": "Person",
+          "name": "Ahmed Al-Farsi"
+        }
+      ],
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "123 Luxury Avenue",
+        "addressLocality": "Dubai",
+        "addressRegion": "Dubai",
+        "postalCode": "12345",
+        "addressCountry": "UAE"
+      },
+      "contactPoint": {
+        "@type": "ContactPoint",
+        "telephone": "+971-4-123-4567",
+        "contactType": "customer service",
+        "email": "contact@fajrluxury.com",
+        "availableLanguage": ["English", "Arabic"]
+      },
+      "sameAs": [
+        "https://www.facebook.com/fajrluxury",
+        "https://www.instagram.com/fajrluxury",
+        "https://twitter.com/fajrluxury",
+        "https://www.youtube.com/fajrluxury"
+      ]
+    }
+    </script>
+    <link rel="stylesheet" href="css/responsive.css">
+    <link rel="stylesheet" href="css/custom.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <!-- Inline styles moved to style.css -->
+     <style>
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 20px;
+            top: 0;
+            height: 100%;
+            width: 2px;
+            background-color: #e0e0e0;
+        }
+        
+        .text-center {
+            text-align: center;
+        }
+        
+        /* Mobile Responsive Styles */
+        @media only screen and (max-width: 767px) {
+            /* Ensure all paragraph text is black on mobile */
+            p {
+                color: var(--dark-text);
+            }
+            .about-hero {
+                padding: 80px 0 40px;
+                height: 40vh;
+            }
+            
+            .about-title {
+                font-size: 2rem;
+            }
+            
+            .about-section {
+                padding: 50px 0;
+            }
+            
+            .about-content {
+                flex-direction: column;
+                gap: 30px;
+                margin-top: 30px;
+            }
+            
+            .about-image {
+                width: 100%;
+                height: 200px;
+                order: -1;
+                margin-bottom: 20px;
+            }
+            
+            .about-text {
+                width: 100%;
+            }
+            
+            .feature-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
+            .feature-card {
+                padding: 25px 15px;
+            }
+            
+            .feature-icon {
+                font-size: 2rem;
+                height: 50px;
+                width: 50px;
+                line-height: 50px;
+            }
+            
+            .feature-title {
+                font-size: 1.3rem;
+            }
+            
+            .feature-card p {
+                color: var(--dark-text);
+            }
+            
+            .team-grid {
+                grid-template-columns: 1fr;
+                gap: 40px;
+            }
+            
+            .team-image {
+                width: 150px;
+                height: 150px;
+            }
+            
+            .team-name {
+                font-size: 1.3rem;
+            }
+            
+            .team-role {
+                color: var(--dark-gray);
+                font-weight: 600;
+                font-size: 0.9rem;
+            }
+            
+            .team-member p:not(.team-role) {
+                color: var(--dark-text);
+            }
+            
+            .team-social a {
+                width: 32px;
+                height: 32px;
+                line-height: 32px;
+                font-size: 0.9rem;
+            }
+            
+            .timeline-item {
+                padding-left: 40px;
+                margin-bottom: 30px;
+            }
+            
+            .timeline-icon {
+                width: 30px;
+                height: 30px;
+                font-size: 0.8rem;
+            }
+            
+            .timeline-content {
+                padding: 15px;
+            }
+            
+            .timeline-content h4 {
+                font-size: 1.1rem;
+            }
+            
+            .timeline-content p {
+                color: var(--dark-text);
+            }
+            
+            .timeline::before {
+                left: 15px;
+            }
+            
+            .section-title {
+                font-size: 1.8rem;
+            }
+            
+            .section-line {
+                margin: 15px auto 25px;
+            }
+        }
+
+
+        
+        /* Tablet Responsive Styles */
+        @media only screen and (min-width: 768px) and (max-width: 991px) {
+            .feature-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .team-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 30px;
+            }
+        }
+    </style>
+</head>
+<body>
+   
+
+    <!-- Header -->
+    <header>
+        <div class="container">
+            <nav class="navbar" aria-label="Main Navigation">
+
+                <div class="logo-image">
+                    
+                    <img src="images/fajr-logo.png" alt="Fajr Luxury Logo" style="width: 50px;">
+                
+                </div>
+                    <div class="logo">
+                    <a href="index.html">FAJR</a>
+                </div>
+                <ul class="nav-menu" role="menubar" aria-label="Main Menu">
+                    <li class="nav-item" role="none"><a href="index.html" class="nav-link" role="menuitem">Home</a></li>
+                    <li class="nav-item" role="none"><a href="perfumes.html" class="nav-link" role="menuitem">Perfumes</a></li>
+                    <li class="nav-item" role="none"><a href="about.html" class="nav-link" role="menuitem" aria-current="page">About Us</a></li>
+                    <li class="nav-item" role="none"><a href="contact.html" class="nav-link" role="menuitem">Contact Us</a></li>
+                    <li class="cart" role="none"><a href="cart.html" class="nav-link active" role="menuitem">Cart</a></li>
+                    <li class="account" role="none"><a href="account.html" class="nav-link active" role="menuitem">My account</a></li>
+                </ul>
+                <div class="nav-icons">
+                    <a href="cart.html" class="icon-link" aria-label="Shopping Cart"><i class="fas fa-shopping-bag" aria-hidden="true"></i></a>
+                    <a href="account.html" class="icon-link" aria-label="My Account"><i class="fas fa-user" aria-hidden="true"></i></a>
+                </div>
+                 <div class="hamburger">
+                    <span class="bar"></span>
+                    <span class="bar"></span>
+                    <span class="bar"></span>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <!-- About Hero Section -->
+    <section class="about-hero">
+        <div class="container">
+            <div class="about-hero-content">
+                <h1 class="about-title">Our Story</h1>
+                <p class="about-subtitle" style="color: var(--light-text);">Discover the journey, vision, and passion behind Fajr Luxury</p>
+            </div>
+        </div>
+    </section>
+    
+
+    <!-- Our Story Section -->
+    <section class="about-section">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">The Fajr Journey</h2>
+                <div class="section-line"></div>
+            </div>
+            <div class="about-content">
+                <div class="about-image">
+                    <img src="images/about2.png" alt="Fajr Luxury brand heritage and journey in premium fragrance creation since inception">
+                </div>
+                <div class="about-text">
+                    <ol class="timeline" aria-label="Company history timeline">
+                        <li class="timeline-item">
+                            <div class="timeline-icon" aria-hidden="true">
+                                <i class="fas fa-star"></i>
+                            </div>
+                            <article class="timeline-content">
+                                <h4>Our Beginning</h4>
+                                <p>FAJR emerged from a deep appreciation for natural beauty and cultural heritage. Our brand was founded in 2019 with a simple yet profound vision: to create luxury products that capture the essence of elegance and sophistication.</p>
+                            </article>
+                        </li>
+                        <li class="timeline-item">
+                            <div class="timeline-icon" aria-hidden="true">
+                                <i class="fas fa-compass"></i>
+                            </div>
+                            <article class="timeline-content">
+                                <h4>Our Inspiration</h4>
+                                <p>Drawing inspiration from the world's most beautiful landscapes and timeless traditions, we set out to craft perfumes, watches, and accessories that tell stories of beauty, grace, and timeless appeal. Our journey began with a commitment to excellence and a passion for creating memorable experiences.</p>
+                            </article>
+                        </li>
+                        <li class="timeline-item">
+                            <div class="timeline-icon" aria-hidden="true">
+                                <i class="fas fa-sun"></i>
+                            </div>
+                            <article class="timeline-content">
+                                <h4>Our Name</h4>
+                                <p>The name "Fajr" means dawn in Arabic, symbolizing new beginnings and the first light of day. Just as dawn brings clarity and beauty to the world, our products aim to illuminate the natural elegance of those who choose them.</p>
+                            </article>
+                        </li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Our Philosophy Section -->
+    <section class="about-section">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">Our Philosophy</h2>
+                <div class="section-line"></div>
+            </div>
+            <p class="text-center" style="color: var(--dark-text);">At Fajr, we believe that luxury is not merely about opulence, but about thoughtful craftsmanship, exceptional quality, and meaningful experiences. Our philosophy is built on three core principles:</p>
+            
+            <div class="feature-grid" role="list" aria-label="Our core philosophy principles">
+                <!-- Feature 1 -->
+                <article class="feature-card" role="listitem">
+                    <div class="feature-icon" aria-hidden="true">
+                        <i class="fas fa-gem"></i>
+                    </div>
+                    <h3 class="feature-title">Artisanal Excellence</h3>
+                    <p>We collaborate with master craftsmen who bring decades of expertise to every creation. Each product is meticulously crafted with attention to the smallest details, ensuring exceptional quality and longevity.</p>
+                </article>
+                
+                <!-- Feature 2 -->
+                <article class="feature-card" role="listitem">
+                    <div class="feature-icon" aria-hidden="true">
+                        <i class="fas fa-globe-asia"></i>
+                    </div>
+                    <h3 class="feature-title">Cultural Heritage</h3>
+                    <p>Our designs draw inspiration from diverse cultural traditions and artistic expressions from around the world. We honor these influences by incorporating elements that celebrate their beauty and significance.</p>
+                </article>
+                
+                <!-- Feature 3 -->
+                <article class="feature-card" role="listitem">
+                    <div class="feature-icon" aria-hidden="true">
+                        <i class="fas fa-leaf"></i>
+                    </div>
+                    <h3 class="feature-title">Sustainable Luxury</h3>
+                    <p>We are committed to responsible practices that minimize environmental impact while maximizing positive social influence. From ethically sourced materials to eco-conscious packaging, sustainability guides our decisions.</p>
+                </article>
+            </div>
+            
+           
+        </div>
+    </section>
+
+   
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-logo">
+                    <h2>FAJR</h2>
+                    <p>Luxury Redefined</p>
+                </div>
+                
+                <nav class="social-icons" aria-label="Social Media Links">
+                    <a href="https://www.instagram.com/fajrperfumes" target="_blank" rel="noopener" class="social-icon" aria-label="Instagram"><i class="fab fa-instagram" aria-hidden="true"></i></a>
+                </nav>
+                
+                <!-- Desktop footer links preserved but hidden on mobile via CSS -->
+                <div class="footer-links">
+                    <nav class="footer-column" aria-label="Quick Links">
+                        <h3>Quick Links</h3>
+                        <ul>
+                            <li><a href="index.html">Home</a></li>
+                            <li><a href="explore.html">Explore</a></li>
+                            <li><a href="about.html">About Us</a></li>
+                            <li><a href="contact.html">Contact</a></li>
+                        </ul>
+                    </nav>
+                    
+                    <!-- Feedback form removed as per requirement -->
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p style="color: var(--light-text);">&copy; 2025 Fajr. All Rights Reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Add inline script to ensure hamburger functionality works with improved accessibility -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Hamburger Menu Toggle with accessibility improvements
+            const hamburger = document.querySelector('.hamburger');
+            const navMenu = document.querySelector('.nav-menu');
+            const body = document.body;
+
+            hamburger.addEventListener('click', function() {
+                const isExpanded = hamburger.getAttribute('aria-expanded') === 'true';
+                hamburger.setAttribute('aria-expanded', !isExpanded);
+                hamburger.classList.toggle('active');
+                navMenu.classList.toggle('active');
+                body.classList.toggle('no-scroll');
+            });
+
+            // Close menu when clicking on a nav link
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.addEventListener('click', function() {
+                    hamburger.classList.remove('active');
+                    navMenu.classList.remove('active');
+                    body.classList.remove('no-scroll');
+                });
+            });
+        });
+    </script>
+    <script src="js/script.js"></script>
+</body>
+</html>

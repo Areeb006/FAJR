@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FAJR Admin Dashboard</title>
+    <link rel="stylesheet" href="css/admin.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="admin-container">
+        <!-- Sidebar -->
+        <nav class="sidebar">
+            <div class="sidebar-header">
+                <h2><i class="fas fa-crown"></i> FAJR Admin</h2>
+            </div>
+            <ul class="sidebar-menu">
+                <li class="menu-item active" data-section="dashboard">
+                    <i class="fas fa-tachometer-alt"></i>
+                    <span>Dashboard</span>
+                </li>
+                <li class="menu-item" data-section="products">
+                    <i class="fas fa-box"></i>
+                    <span>Products</span>
+                </li>
+                <li class="menu-item" data-section="users">
+                    <i class="fas fa-users"></i>
+                    <span>Users</span>
+                </li>
+                <li class="menu-item" data-section="orders">
+                    <i class="fas fa-shopping-cart"></i>
+                    <span>Orders</span>
+                </li>
+            </ul>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Header -->
+            <header class="admin-header">
+                <button class="mobile-menu-toggle" id="mobile-menu-toggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <h1 id="page-title">Dashboard</h1>
+                <div class="header-actions">
+                    <button class="btn btn-primary" onclick="refreshData()">
+                        <i class="fas fa-sync-alt"></i> Refresh
+                    </button>
+                </div>
+            </header>
+
+            <!-- Dashboard Section -->
+            <section id="dashboard" class="content-section active">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-box"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3 id="total-products">0</h3>
+                            <p>Total Products</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3 id="total-users">0</h3>
+                            <p>Total Users</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-shopping-cart"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3 id="total-orders">0</h3>
+                            <p>Total Orders</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-rupee-sign"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3 id="total-revenue">₹0</h3>
+                            <p>Total Revenue</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="dashboard-grid">
+                    <div class="dashboard-card">
+                        <h3>Recent Products</h3>
+                        <div id="recent-products" class="recent-list">
+                            <div class="loading">Loading...</div>
+                        </div>
+                    </div>
+                    <div class="dashboard-card">
+                        <h3>Recent Users</h3>
+                        <div id="recent-users" class="recent-list">
+                            <div class="loading">Loading...</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Products Section -->
+            <section id="products" class="content-section">
+                <div class="section-header">
+                    <h2>Product Management</h2>
+                    <button class="btn btn-primary" onclick="showAddProductModal()">
+                        <i class="fas fa-plus"></i> Add Product
+                    </button>
+                </div>
+                
+                <div class="filters">
+                    <input type="text" id="product-search" placeholder="Search products..." class="search-input">
+                    <!-- Categories filter removed as per requirement -->
+                    <select id="gender-filter" class="filter-select">
+                        <option value="">All Genders</option>
+                        <option value="For Him">For Him</option>
+                        <option value="For Her">For Her</option>
+                        <option value="Unisex">Unisex</option>
+                    </select>
+                </div>
+
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Image</th>
+                                <th>Name</th>
+                                <th>Category</th>
+                                <th>Gender</th>
+                                <th>Price</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="products-table-body">
+                            <tr>
+                                <td colspan="7" class="loading">Loading products...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Users Section -->
+            <section id="users" class="content-section">
+                <div class="section-header">
+                    <h2>User Management</h2>
+                </div>
+                
+                <div class="filters">
+                    <input type="text" id="user-search" placeholder="Search users..." class="search-input">
+                </div>
+
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Phone</th>
+                                <th>Gender</th>
+                                <th>Joined</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="users-table-body">
+                            <tr>
+                                <td colspan="7" class="loading">Loading users...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Orders Section -->
+            <section id="orders" class="content-section">
+                <div class="section-header">
+                    <h2>Order Management</h2>
+                </div>
+                
+                <div class="filters">
+                    <select id="order-status-filter" class="filter-select">
+                        <option value="">All Statuses</option>
+                        <option value="pending">Pending</option>
+                        <option value="placed">Order Placed</option>
+                        <option value="shipped">Shipped</option>
+                        <option value="out_for_delivery">Out for Delivery</option>
+                        <option value="delivered">Delivered</option>
+                        <option value="cancelled">Cancelled</option>
+                    </select>
+                </div>
+
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Order ID</th>
+                                <th>Customer</th>
+                                <th>Products</th>
+                                <th>Total</th>
+                                <th>Status</th>
+                                <th>Date</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="orders-table-body">
+                            <tr>
+                                <td colspan="7" class="loading">Loading orders...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Add/Edit Product Modal -->
+    <div id="product-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modal-title">Add Product</h3>
+                <span class="close" onclick="closeProductModal()">&times;</span>
+            </div>
+            <form id="product-form" class="modal-body">
+                <div class="form-group">
+                    <label for="product-title">Product Title *</label>
+                    <input type="text" id="product-title" name="title" required>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="product-gender">Gender *</label>
+                        <select id="product-gender" name="gender" required>
+                            <option value="">Select Gender</option>
+                            <option value="For Him">For Him</option>
+                            <option value="For Her">For Her</option>
+                            <option value="Unisex">Unisex</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="product-price">Price (₹) *</label>
+                        <input type="number" id="product-price" name="price" step="0.01" min="0" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="product-description">Description *</label>
+                    <textarea id="product-description" name="description" rows="4" required></textarea>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="product-volume">Volume</label>
+                        <input type="text" id="product-volume" name="volume" placeholder="e.g., 50ml, 100ml">
+                    </div>
+                    <div class="form-group">
+                        <label for="product-longevity">Longevity</label>
+                        <select id="product-longevity" name="longevity">
+                            <option value="">Select Longevity</option>
+                            <option value="2-4 hours">2-4 hours</option>
+                            <option value="4-6 hours">4-6 hours</option>
+                            <option value="6-8 hours">6-8 hours</option>
+                            <option value="8+ hours">8+ hours</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="product-image">Product Image</label>
+                    <div class="image-upload-container">
+                        <input type="file" id="product-image" name="image" accept="image/*" style="display: none;">
+                        <button type="button" class="btn btn-upload" onclick="document.getElementById('product-image').click()">
+                            <i class="fas fa-upload"></i> Choose Image
+                        </button>
+                        <span id="image-filename" class="filename-display">No file selected</span>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeProductModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary" id="submit-btn">Add Product</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- User Details Modal -->
+    <div id="user-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>User Details</h3>
+                <span class="close" onclick="closeUserModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="user-info-section">
+                    <h4><i class="fas fa-user"></i> Personal Information</h4>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <label>Name:</label>
+                            <span id="user-name"></span>
+                        </div>
+                        <div class="info-item">
+                            <label>Email:</label>
+                            <span id="user-email"></span>
+                        </div>
+                        <div class="info-item">
+                            <label>Phone:</label>
+                            <span id="user-phone"></span>
+                        </div>
+                        <div class="info-item">
+                            <label>Gender:</label>
+                            <span id="user-gender"></span>
+                        </div>
+                        <div class="info-item">
+                            <label>Date of Birth:</label>
+                            <span id="user-dob"></span>
+                        </div>
+                        <div class="info-item">
+                            <label>Joined:</label>
+                            <span id="user-joined"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="user-addresses-section">
+                    <h4><i class="fas fa-map-marker-alt"></i> Addresses</h4>
+                    <div id="user-addresses" class="addresses-container">
+                        <div class="loading">Loading addresses...</div>
+                    </div>
+                </div>
+
+                <div class="user-orders-section">
+                    <h4><i class="fas fa-shopping-cart"></i> Recent Orders</h4>
+                    <div id="user-orders" class="orders-container">
+                        <div class="loading">Loading orders...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Order Details Modal -->
+    <div id="order-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Order Details</h3>
+                <span class="close" onclick="closeOrderModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div id="order-details-content">
+                    <div class="loading">Loading order details...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/admin.js"></script>
+</body>
+</html>
