@@ -403,6 +403,41 @@ def update_product_admin(product_id):
         print(f"Error updating product: {e}")
         return jsonify({'success': False, 'message': 'Failed to update product'}), 500
 
+@app.route('/api/admin/products/<int:product_id>', methods=['DELETE'])
+def delete_product_admin(product_id):
+    """Delete a product"""
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        
+        # Check if product exists
+        product = cursor.execute('SELECT * FROM products WHERE id = ?', (product_id,)).fetchone()
+        if not product:
+            conn.close()
+            return jsonify({'success': False, 'message': 'Product not found'}), 404
+        
+        # Check if product has any orders (optional - you might want to prevent deletion if orders exist)
+        orders = cursor.execute('SELECT COUNT(*) FROM orders WHERE product_id = ?', (product_id,)).fetchone()
+        order_count = orders[0] if orders else 0
+        
+        if order_count > 0:
+            conn.close()
+            return jsonify({
+                'success': False, 
+                'message': f'Cannot delete product. It has {order_count} associated order(s). Please cancel or complete those orders first.'
+            }), 400
+        
+        # Delete the product
+        cursor.execute('DELETE FROM products WHERE id = ?', (product_id,))
+        
+        conn.commit()
+        conn.close()
+        
+        return jsonify({'success': True, 'message': 'Product deleted successfully'})
+    except Exception as e:
+        print(f"Error deleting product: {e}")
+        return jsonify({'success': False, 'message': str(e)}), 500
+
 @app.route('/api/admin/users', methods=['GET'])
 def get_users_admin():
     try:
