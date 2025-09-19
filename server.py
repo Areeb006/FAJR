@@ -431,43 +431,76 @@ def get_users_admin():
 def get_admin_orders():
     """Get all orders for admin with user and product details"""
     try:
+        print("DEBUG: Admin orders endpoint called")
         conn = get_db_connection()
         cursor = conn.cursor()
         
-        # Get all orders with user and product details
+        # Get all orders with user details AND product details from products table
         orders = cursor.execute('''
-            SELECT o.*, p.title as product_title,
-                   u.first_name, u.last_name, u.email
+            SELECT o.*, 
+                   u.first_name, u.last_name, u.email,
+                   p.title as product_title_from_products,
+                   p.image_filename as product_image_from_products
             FROM orders o
-            LEFT JOIN products p ON o.product_id = p.id
             LEFT JOIN users u ON o.user_id = u.id
+            LEFT JOIN products p ON o.product_id = p.id
             ORDER BY o.created_at DESC
         ''').fetchall()
         
         conn.close()
+        print(f"DEBUG: Found {len(orders)} orders")
         
         orders_list = []
         for order in orders:
-            orders_list.append({
-                'id': order['id'],
-                'user_name': f"{order['first_name']} {order['last_name']}",
-                'user_email': order['email'],
-                'total_amount': order['total_amount'],
-                'payment_method': order['payment_method'],
-                'order_status': order['order_status'],
-                'created_at': order['created_at'],
-                'items': [{
-                    'product_title': order['product_title'],
-                    'product_image': f"/api/product-image/{order['product_id']}?t={int(time.time()*1000)}",
-                    'quantity': order['quantity']
-                }]
-            })
+            try:
+                # Convert row to dict for easier access
+                order_dict = dict(order)
+                print(f"DEBUG: Processing order {order_dict.get('id', 'unknown')}")
+                
+                # Get user name safely
+                first_name = order_dict.get('first_name') or 'Unknown'
+                last_name = order_dict.get('last_name') or 'User'
+                email = order_dict.get('email') or 'No email'
+                
+                # Get product info - try from products table first, then from order table
+                product_title = (order_dict.get('product_title_from_products') or 
+                               order_dict.get('product_title') or 
+                               'Unknown Product')
+                
+                # For product image, use database image endpoint if product_id exists
+                product_id = order_dict.get('product_id')
+                if product_id:
+                    product_image = f"/api/product-image/{product_id}?t={int(time.time()*1000)}"
+                else:
+                    product_image = order_dict.get('product_image') or '/images/placeholder.svg'
+                
+                order_data = {
+                    'id': order_dict.get('id'),
+                    'user_id': order_dict.get('user_id'),
+                    'user_name': f"{first_name} {last_name}",
+                    'user_email': email,
+                    'total_amount': float(order_dict.get('total_amount', 0)),
+                    'order_status': order_dict.get('order_status', 'pending'),
+                    'created_at': order_dict.get('created_at', ''),
+                    'product_title': product_title,
+                    'quantity': order_dict.get('quantity', 1),
+                    'price': float(order_dict.get('price', 0)),
+                    'product_image': product_image,
+                    'product_id': product_id
+                }
+                orders_list.append(order_data)
+                print(f"DEBUG: Order {order_dict.get('id')} - Product: {product_title}")
+                
+            except Exception as order_error:
+                print(f"DEBUG: Error processing order: {order_error}")
+                continue
         
+        print(f"DEBUG: Returning {len(orders_list)} orders")
         return jsonify({'success': True, 'orders': orders_list})
         
     except Exception as e:
-        print(f"Error fetching admin orders: {e}")
-        return jsonify({'success': False, 'message': 'Failed to fetch orders', 'orders': []})
+        print(f"ERROR: Admin orders failed: {e}")
+        return jsonify({'success': False, 'message': str(e)}), 500
 
 @app.route('/api/admin/orders/<int:order_id>/status', methods=['PUT'])
 def update_order_status(order_id):
@@ -504,14 +537,15 @@ def get_order_details(order_id):
     try:
         conn = get_db_connection()
         cursor = conn.cursor()
-        # Fetch the order with joined user, address, and product
+        
+        # Fetch the order with user details AND product details
         order = cursor.execute('''
-            SELECT o.*, u.first_name, u.last_name, u.email,
-                   a.street_address, a.apartment, a.city, a.state, a.postal_code, a.country,
-                   p.title as product_title
+            SELECT o.*, 
+                   u.first_name, u.last_name, u.email,
+                   p.title as product_title_from_products,
+                   p.image_filename as product_image_from_products
             FROM orders o
             LEFT JOIN users u ON o.user_id = u.id
-            LEFT JOIN addresses a ON o.address_id = a.id
             LEFT JOIN products p ON o.product_id = p.id
             WHERE o.id = ?
         ''', (order_id,)).fetchone()
@@ -520,37 +554,105 @@ def get_order_details(order_id):
             conn.close()
             return jsonify({'success': False, 'message': 'Order not found'}), 404
 
-        shipping_address = ''
-        if row_get(order, 'street_address'):
-            shipping_address = f"{row_get(order, 'street_address', '')}"
-            if row_get(order, 'apartment'):
-                shipping_address += f", {row_get(order, 'apartment')}"
-            shipping_address += f", {row_get(order, 'city', '')}, {row_get(order, 'state', '')} {row_get(order, 'postal_code', '')}, {row_get(order, 'country', '')}"
+        # Convert to dict for easier access
+        order_dict = dict(order)
+        user_id = order_dict.get('user_id')
 
-        # One row per order in current schema
+        # Get user name safely
+        first_name = order_dict.get('first_name') or 'Unknown'
+        last_name = order_dict.get('last_name') or 'User'
+        user_name = f"{first_name} {last_name}".strip()
+        
+        # Get user's address (try default first, then any address)
+        shipping_address = 'Address will be collected during delivery'  # Default fallback
+        if user_id:
+            # Try to get default address first
+            address = cursor.execute('''
+                SELECT * FROM addresses 
+                WHERE user_id = ? AND is_default = 1 
+                ORDER BY created_at DESC LIMIT 1
+            ''', (user_id,)).fetchone()
+            
+            # If no default address, get the most recent address
+            if not address:
+                address = cursor.execute('''
+                    SELECT * FROM addresses 
+                    WHERE user_id = ? 
+                    ORDER BY created_at DESC LIMIT 1
+                ''', (user_id,)).fetchone()
+            
+            # Format address if found
+            if address:
+                address_dict = dict(address)
+                address_parts = []
+                
+                if address_dict.get('name'):
+                    address_parts.append(f"Name: {address_dict['name']}")
+                
+                if address_dict.get('street_address'):
+                    address_parts.append(address_dict['street_address'])
+                
+                if address_dict.get('landmark'):
+                    address_parts.append(f"Near {address_dict['landmark']}")
+                
+                city_state = []
+                if address_dict.get('city'):
+                    city_state.append(address_dict['city'])
+                if address_dict.get('state'):
+                    city_state.append(address_dict['state'])
+                if city_state:
+                    address_parts.append(', '.join(city_state))
+                
+                if address_dict.get('postal_code'):
+                    address_parts.append(f"PIN: {address_dict['postal_code']}")
+                
+                if address_dict.get('country'):
+                    address_parts.append(address_dict['country'])
+                
+                if address_dict.get('phone'):
+                    address_parts.append(f"Phone: {address_dict['phone']}")
+                
+                if address_parts:
+                    shipping_address = '\n'.join(address_parts)
+        
+        # Get product info - try from products table first, then from order table
+        product_title = (order_dict.get('product_title_from_products') or 
+                        order_dict.get('product_title') or 
+                        'Unknown Product')
+        
+        # For product image, use database image endpoint if product_id exists
+        product_id = order_dict.get('product_id')
+        if product_id:
+            product_image = f"/api/product-image/{product_id}?t={int(time.time()*1000)}"
+        else:
+            product_image = order_dict.get('product_image') or '/images/placeholder.svg'
+
+        # Create items list from order data
         items_list = [{
-            'product_title': row_get(order, 'product_title', 'Product'),
-            'product_image': f"/api/product-image/{row_get(order, 'product_id')}?t={int(time.time()*1000)}" if row_get(order, 'product_id') else '',
-            'quantity': row_get(order, 'quantity', 1),
-            'price': float(row_get(order, 'total_amount', 0))
+            'product_title': product_title,
+            'product_image': product_image,
+            'quantity': order_dict.get('quantity', 1),
+            'price': float(order_dict.get('price', 0))
         }]
 
         order_data = {
-            'id': row_get(order, 'id'),
-            'user_id': row_get(order, 'user_id'),
-            'user_name': f"{row_get(order, 'first_name', '')} {row_get(order, 'last_name', '')}".strip() or 'Unknown User',
-            'user_email': row_get(order, 'email', ''),
-            'total_amount': float(row_get(order, 'total_amount', 0)),
-            'payment_method': row_get(order, 'payment_method', 'COD'),
-            'status': row_get(order, 'order_status', 'pending'),
-            'shipping_address': shipping_address or 'No address provided',
-            'created_at': row_get(order, 'created_at', ''),
+            'id': order_dict.get('id'),
+            'user_id': order_dict.get('user_id'),
+            'user_name': user_name,
+            'user_email': order_dict.get('email') or 'No email',
+            'total_amount': float(order_dict.get('total_amount', 0)),
+            'payment_method': 'Cash on Delivery',  # Default payment method
+            'status': order_dict.get('order_status', 'pending'),
+            'shipping_address': shipping_address,
+            'created_at': order_dict.get('created_at', ''),
             'items': items_list
         }
 
         conn.close()
         return jsonify({'success': True, 'order': order_data})
+        
     except Exception as e:
+        print(f"Error getting order details: {e}")
         return jsonify({'success': False, 'message': str(e)}), 500
 
 @app.route('/api/admin/users/<int:user_id>', methods=['GET'])
@@ -1438,19 +1540,32 @@ def get_user_orders_admin(user_id):
     """Get user orders for admin"""
     try:
         conn = get_db_connection()
-        orders = conn.execute('''
-            SELECT * FROM orders WHERE user_id = ? ORDER BY created_at DESC LIMIT 10
+        cursor = conn.cursor()
+        
+        # Get orders with product information
+        orders = cursor.execute('''
+            SELECT o.*, p.title as product_title
+            FROM orders o
+            LEFT JOIN products p ON o.product_id = p.id
+            WHERE o.user_id = ? 
+            ORDER BY o.created_at DESC 
+            LIMIT 10
         ''', (user_id,)).fetchall()
+        
         conn.close()
         
         order_list = []
         for order in orders:
+            order_dict = dict(order)
             order_data = {
-                'id': order[0],
-                'user_id': order[1],
-                'total_amount': order[2],
-                'order_status': order[3] if len(order) > 3 else 'pending',
-                'created_at': order[4] if len(order) > 4 else ''
+                'id': order_dict.get('id'),
+                'user_id': order_dict.get('user_id'),
+                'total_amount': float(order_dict.get('total_amount', 0)),
+                'order_status': order_dict.get('order_status', 'pending'),
+                'created_at': order_dict.get('created_at', ''),
+                'product_title': order_dict.get('product_title') or order_dict.get('product_title', 'Unknown Product'),
+                'quantity': order_dict.get('quantity', 1),
+                'price': float(order_dict.get('price', 0))
             }
             order_list.append(order_data)
         
@@ -1512,6 +1627,15 @@ def delete_order_admin(order_id):
     except Exception as e:
         print(f"Error deleting order: {e}")
         return jsonify({'success': False, 'message': str(e)}), 500
+
+# Add cache-busting headers for development
+@app.after_request
+def after_request(response):
+    # Disable caching for development
+    response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+    response.headers['Pragma'] = 'no-cache'
+    response.headers['Expires'] = '0'
+    return response
 
 if __name__ == '__main__':
     init_db()
