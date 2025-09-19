@@ -583,6 +583,39 @@ function closeProductModal() {
     document.getElementById('product-modal').style.display = 'none';
 }
 
+async function deleteProduct(productId) {
+    if (!confirm('Are you sure you want to delete this product? This action cannot be undone.')) {
+        return;
+    }
+    
+    console.log('Deleting product:', productId);
+    
+    try {
+        const response = await fetch(`/api/admin/products/${productId}`, {
+            method: 'DELETE'
+        });
+        
+        console.log('Delete response:', response);
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        console.log('Delete response data:', data);
+        
+        if (data.success) {
+            showSuccess(data.message || 'Product deleted successfully');
+            loadProducts(); // Refresh products list
+        } else {
+            showError('Error: ' + (data.message || 'Failed to delete product'));
+        }
+    } catch (error) {
+        console.error('Error deleting product:', error);
+        showError('Failed to delete product: ' + error.message);
+    }
+}
+
 async function handleProductSubmit(e) {
     e.preventDefault();
     
@@ -611,11 +644,11 @@ async function handleProductSubmit(e) {
                     await uploadImageForProduct(currentProductId, imageFile);
                 }
                 
-                alert('Product updated successfully!');
+                showSuccess('Product updated successfully!');
                 closeProductModal();
                 loadProducts();
             } else {
-                alert('Error: ' + result.message);
+                showError('Error: ' + result.message);
             }
         } else {
             // Create new product - include image in the same request
@@ -627,17 +660,16 @@ async function handleProductSubmit(e) {
             const result = await response.json();
             
             if (result.success) {
-                alert('Product added successfully!');
+                showSuccess('Product added successfully!');
                 closeProductModal();
                 loadProducts();
             } else {
-                alert('Error: ' + result.message);
+                showError('Error: ' + result.message);
             }
         }
-        
     } catch (error) {
-        console.error('Error saving product:', error);
-        alert('Failed to save product');
+        console.error('Error submitting product:', error);
+        showError('Failed to save product: ' + error.message);
     } finally {
         submitBtn.textContent = originalText;
         submitBtn.disabled = false;
@@ -673,99 +705,6 @@ async function uploadImageForProduct(productId, imageFile) {
     }
 }
 
-async function deleteProduct(productId) {
-    if (!confirm('Are you sure you want to delete this product?')) {
-        return;
-    }
-    
-    try {
-        const response = await fetch(`/api/admin/products/${productId}`, {
-            method: 'DELETE'
-        });
-        
-        const data = await response.json();
-        
-        if (data.success) {
-            alert(data.message);
-            loadProducts(); // Refresh products list
-        } else {
-            alert('Error: ' + data.message);
-        }
-    } catch (error) {
-        console.error('Error deleting product:', error);
-        alert('Failed to delete product. Check console for details.');
-    }
-}
-
-// Image upload functionality
-function uploadImage(productId) {
-    // Create file input element
-    const fileInput = document.createElement('input');
-    fileInput.type = 'file';
-    fileInput.accept = 'image/*';
-    fileInput.style.display = 'none';
-    
-    fileInput.addEventListener('change', function(e) {
-        const file = e.target.files[0];
-        if (!file) return;
-        
-        // Validate file size (max 5MB)
-        if (file.size > 5 * 1024 * 1024) {
-            alert('File size must be less than 5MB');
-            return;
-        }
-        
-        // Show loading state
-        const uploadBtn = document.querySelector(`button[onclick="uploadImage(${productId})"]`);
-        const originalText = uploadBtn.textContent;
-        uploadBtn.textContent = 'Uploading...';
-        uploadBtn.disabled = true;
-        
-        // Create FormData
-        const formData = new FormData();
-        formData.append('image', file);
-        
-        // Upload image
-        fetch(`/api/admin/upload-product-image/${productId}`, {
-            method: 'POST',
-            body: formData
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                alert('Image uploaded successfully!');
-                // Force refresh with cache busting
-                setTimeout(() => {
-                    loadProducts();
-                    // Also force refresh any existing product images in the table
-                    const productImages = document.querySelectorAll(`img[src*="/api/product-image/${productId}"]`);
-                    productImages.forEach(img => {
-                        const originalSrc = img.src.split('?')[0]; // Remove any existing cache busting
-                        img.src = originalSrc + '?t=' + Date.now();
-                    });
-                }, 100);
-            } else {
-                alert('Error uploading image: ' + data.message);
-            }
-        })
-        .catch(error => {
-            console.error('Upload error:', error);
-            alert('Failed to upload image');
-        })
-        .finally(() => {
-            // Reset button state
-            uploadBtn.textContent = originalText;
-            uploadBtn.disabled = false;
-        });
-    });
-    
-    // Trigger file selection
-    document.body.appendChild(fileInput);
-    fileInput.click();
-    document.body.removeChild(fileInput);
-}
-
-// User management functions
 async function loadUsers() {
     try {
         const response = await fetch('/api/admin/users');
